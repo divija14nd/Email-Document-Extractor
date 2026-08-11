@@ -10,14 +10,23 @@ def iter_pdf_attachments(service, query):
         for msg_meta in response.get("messages", []):
             message = service.users().messages().get(userId=user_id, id=msg_meta["id"]).execute()
             received_at = _message_date(message)
+            sender = _message_sender(message)
             for filename, pdf_bytes in _walk_parts(service, user_id, message["id"], message.get("payload", {})):
-                yield filename, pdf_bytes, received_at
+                yield filename, pdf_bytes, received_at, sender
         request = service.users().messages().list_next(previous_request=request, previous_response=response)
 
 
 def _message_date(message):
     internal_date_ms = int(message.get("internalDate", 0))
     return datetime.fromtimestamp(internal_date_ms / 1000, tz=timezone.utc)
+
+
+def _message_sender(message):
+    headers = message.get("payload", {}).get("headers", [])
+    for header in headers:
+        if header.get("name", "").lower() == "from":
+            return header.get("value", "")
+    return ""
 
 
 def _walk_parts(service, user_id, message_id, part):

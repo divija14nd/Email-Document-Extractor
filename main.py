@@ -38,7 +38,7 @@ def main():
     service = get_gmail_service()
 
     saved = 0
-    for filename, pdf_bytes, received_at in iter_pdf_attachments(service, args.query):
+    for filename, pdf_bytes, received_at, sender in iter_pdf_attachments(service, args.query):
         decrypted = decrypt_pdf(pdf_bytes, passwords)
         if decrypted is None:
             print(f"Skipped (no password worked): {filename}")
@@ -48,7 +48,7 @@ def main():
         month_folder = received_at.strftime("%Y-%m")
         matched_any = False
 
-        for category in matching_categories(text, categories):
+        for category in matching_categories(text, sender, categories):
             dest_dir = base_dir() / category / month_folder
             dest_dir.mkdir(parents=True, exist_ok=True)
             dest = dest_dir / filename

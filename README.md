@@ -1,10 +1,14 @@
 # Email PDF Extractor
 
-Scans a Gmail inbox for PDF attachments and unlocks password-protected ones
-using a known set of passwords. Every unlocked PDF is checked against:
+Scans a Gmail inbox for PDF attachments. If a PDF isn't password-protected it
+opens as-is; if it is, the tool tries a known set of passwords to unlock it.
+Every unlocked PDF is checked against:
 
 - **Built-in categories** (bank statements, NSDL statements) — matches are
   filed into `<Category>/<YYYY-MM>/`, using the month the email was received.
+  A PDF matches a category if the **sender's email** matches one of the
+  configured addresses/domains, **or** if the PDF text contains one of the
+  configured keywords — either is enough.
 - **An optional custom search word** you pass on the command line — matches
   are filed into a folder named after that word.
 
@@ -25,19 +29,31 @@ Python, to run it locally during development.
      the recipient's Gmail address as a test user.
    - Create an **OAuth client ID** of type **Desktop app**.
    - Download the resulting file and save it as `credentials.json`.
-2. **Set the known passwords and category keywords** in `config.json`:
+2. **Set the known passwords, category keywords, and sender addresses** in
+   `config.json`:
    ```json
    {
      "passwords": ["password1", "password2", "password3", "password4"],
      "categories": {
-       "Bank Statements": ["account statement", "statement of account", "bank statement"],
-       "NSDL Statements": ["nsdl", "depository", "demat account statement", "consolidated account statement"]
+       "Bank Statements": {
+         "keywords": ["account statement", "statement of account", "bank statement"],
+         "senders": ["alerts@yourbank.com"]
+       },
+       "NSDL Statements": {
+         "keywords": ["nsdl", "depository", "demat account statement", "consolidated account statement"],
+         "senders": ["einward.ractech@nsdl.co.in"]
+       }
      }
    }
    ```
-   A PDF is filed under a category if any of its keywords appear in the PDF's
-   text. Add/remove keywords or whole categories as needed — the folder name
-   is taken directly from the category key.
+   Replace the placeholder `senders` addresses with the real sender
+   addresses/domains the recipient's bank and NSDL/depository emails come
+   from — check a real statement email to find these. `senders` matching is
+   a substring check, so a bare domain like `"yourbank.com"` also works and
+   catches any address at that domain. Either `keywords` or `senders` can be
+   an empty list `[]` if you only want to match on the other one. Add/remove
+   whole categories as needed — the folder name is taken directly from the
+   category key.
 
 ## Building the Windows executable
 

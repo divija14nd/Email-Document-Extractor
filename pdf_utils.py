@@ -43,10 +43,15 @@ def text_contains(text, word):
     return word.lower() in text.lower()
 
 
-def matching_categories(text, categories):
+def matching_categories(text, sender, categories):
     text_lower = text.lower()
-    return [
-        category
-        for category, keywords in categories.items()
-        if any(keyword.lower() in text_lower for keyword in keywords)
-    ]
+    sender_lower = (sender or "").lower()
+    matches = []
+    for category, rule in categories.items():
+        keywords = rule.get("keywords", [])
+        senders = rule.get("senders", [])
+        keyword_hit = any(keyword.lower() in text_lower for keyword in keywords)
+        sender_hit = any(pattern.lower() in sender_lower for pattern in senders)
+        if keyword_hit or sender_hit:
+            matches.append(category)
+    return matches

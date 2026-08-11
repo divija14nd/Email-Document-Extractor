@@ -1,7 +1,13 @@
 {
   "passwords": ["password1", "password2", "password3", "password4"],
   "categories": {
-    "Bank Statements": ["account statement", "statement of account", "bank statement"],
-    "NSDL Statements": ["nsdl", "depository", "demat account statement", "consolidated account statement"]
+    "Bank Statements": {
+      "keywords": ["account statement", "statement of account", "bank statement"],
+      "senders": ["alerts@yourbank.com"]
+    },
+    "NSDL Statements": {
+      "keywords": ["nsdl", "depository", "demat account statement", "consolidated account statement"],
+      "senders": ["einward.ractech@nsdl.co.in"]
+    }
   }
 }
