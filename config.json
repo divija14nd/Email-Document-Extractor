@@ -1,0 +1,7 @@
+{
+  "passwords": ["password1", "password2", "password3", "password4"],
+  "categories": {
+    "Bank Statements": ["account statement", "statement of account", "bank statement"],
+    "NSDL Statements": ["nsdl", "depository", "demat account statement", "consolidated account statement"]
+  }
+}

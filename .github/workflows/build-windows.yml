@@ -1,0 +1,51 @@
+name: Build Windows executable
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build EmailExtractor.exe
+        run: >
+          pyinstaller --onefile --name EmailExtractor
+          --collect-all pikepdf
+          --collect-all pdfplumber
+          --collect-all google_auth_oauthlib
+          --collect-all googleapiclient
+          --collect-all google.auth
+          main.py
+
+      - name: Smoke test the built exe
+        run: |
+          dist\EmailExtractor.exe --help
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "EmailExtractor.exe --help exited with code $LASTEXITCODE"
+            exit 1
+          }
+
+      - name: Assemble release folder
+        run: |
+          mkdir release
+          copy dist\EmailExtractor.exe release\
+          copy config.json release\
+          copy README.md release\
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EmailExtractor-windows
+          path: release/

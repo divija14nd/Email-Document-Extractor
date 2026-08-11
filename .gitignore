@@ -1,0 +1,9 @@
+token.json
+credentials.json
+__pycache__/
+*.pyc
+.venv/
+build/
+dist/
+*.spec
+release/
