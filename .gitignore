@@ -1,5 +1,6 @@
 token.json
 credentials.json
+last_run.json
 __pycache__/
 *.pyc
 .venv/

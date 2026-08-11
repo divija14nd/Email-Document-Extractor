@@ -92,6 +92,13 @@ The first run opens a browser window asking the recipient to sign in to
 Google and approve read-only Gmail access. After approving once, a
 `token.json` is cached next to the exe so future runs don't ask again.
 
+Each run also saves a `last_run.json` next to the exe. On the next run, the
+tool only asks Gmail for emails received since that timestamp, instead of
+rescanning the whole mailbox every time. (Gmail's date filter is day-level,
+so emails from the same calendar day as the last run may get reprocessed —
+harmless, just means a file gets overwritten with an identical copy.) Delete
+`last_run.json` if you ever want to force a full rescan.
+
 Output layout (created next to the exe):
 
 ```

@@ -1,11 +1,13 @@
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 
 from gmail_auth import get_gmail_service
 from gmail_client import iter_pdf_attachments
 from paths import base_dir
 from pdf_utils import decrypt_pdf, extract_text, matching_categories, text_contains
+from state import load_last_run, save_last_run
 
 CONFIG_PATH = base_dir() / "config.json"
 
@@ -35,10 +37,17 @@ def main():
     passwords = config.get("passwords", [])
     categories = config.get("categories", {})
 
+    query = args.query
+    last_run = load_last_run()
+    if last_run:
+        query = f"{query} after:{last_run.strftime('%Y/%m/%d')}"
+        print(f"Only scanning emails since last run ({last_run.strftime('%Y-%m-%d')})")
+    run_started_at = datetime.now(timezone.utc)
+
     service = get_gmail_service()
 
     saved = 0
-    for filename, pdf_bytes, received_at, sender in iter_pdf_attachments(service, args.query):
+    for filename, pdf_bytes, received_at, sender in iter_pdf_attachments(service, query):
         decrypted = decrypt_pdf(pdf_bytes, passwords)
         if decrypted is None:
             print(f"Skipped (no password worked): {filename}")
@@ -69,6 +78,7 @@ def main():
         if not matched_any:
             print(f"No match: {filename}")
 
+    save_last_run(run_started_at)
     print(f"Done. {saved} PDF(s) saved.")
 
 
